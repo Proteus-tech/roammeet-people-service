@@ -16,7 +16,7 @@ defmodule People do
     { :ok, _ } = :cowboy.start_http(
       :http,
       100,
-      [port: 8009],
+      [port: 8008],
       [env: [
           dispatch: routes()
         ]
@@ -28,7 +28,7 @@ defmodule People do
     :cowboy_router.compile([
       { :_,
         [
-          {"/hello", Meetup.Hello, []},
+          {"/hello", People.Hello, []},
       ]}
     ])
   end
