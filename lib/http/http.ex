@@ -20,7 +20,8 @@ defmodule People.HTTP do
       { :_,
         [
           {"/hello", People.Hello, []},
-          {"/people", People.People, []},
+          {"/peoples", People.HTTP.Peoples, []},
+          {"/people/:email", People.HTTP.People, []},
           {:_, People.HTTP.NotFoundHandler, []},
         ]
       }

@@ -1,4 +1,4 @@
-defmodule People.People do
+defmodule People.HTTP.Peoples do
   @behaviour :cowboy_http_handler
   import Ecto.Query
 
@@ -27,7 +27,6 @@ defmodule People.People do
   def get_handle(req, state) do
     people = PeopleSchema
       |> select([m], %{
-        "id" => m.id,
         "name" => m.name,
         "email" => m.email
         })
@@ -69,6 +68,56 @@ defmodule People.People do
 
   def miss_fieldes(require_field, keys_body) do
     Enum.filter(require_field, fn(f) -> not Enum.member?(keys_body, f) end)
+  end
+
+  def terminate(_reason, _request, _state) do
+    :ok
+  end
+end
+
+
+defmodule People.HTTP.People do
+  @behaviour :cowboy_http_handler
+  import Ecto.Query
+
+  alias People.Repo, as: Repo
+  alias People.PeopleSchema, as: PeopleSchema
+
+  def init({ _any, :http }, req, []) do
+    { :ok, req, :undefined }
+  end
+
+  def handle(req, state) do
+    { method, _ } = :cowboy_req.method req
+    IO.puts method
+    { path, _ } = :cowboy_req.path req
+    IO.puts path
+    # IO.inspect map_data
+    case method do
+      "GET" ->
+        get_handle(req, state)
+      _ ->
+        { :ok, req } = :cowboy_req.reply 400, [], '-*-', req
+        { :ok, req, state }
+    end
+  end
+
+  def get_handle(req, state) do
+    { email, _ } = :cowboy_req.binding(:email, req)
+    people = PeopleSchema
+      |> select([m], %{
+        "name" => m.name,
+        "email" => m.email,
+        })
+      |> where([m], m.email == ^email)
+      |> Repo.one
+    if people === nil do
+      { :ok, req } = :cowboy_req.reply 404, [], "user not found: #{email}", req
+      { :ok, req, state }
+    else
+      { :ok, req } = :cowboy_req.reply 200, [], Poison.encode!(people), req
+      { :ok, req, state }
+    end
   end
 
   def terminate(_reason, _request, _state) do

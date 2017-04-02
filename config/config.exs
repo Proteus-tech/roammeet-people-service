@@ -33,7 +33,7 @@ config :people, People.Repo, migration_source: "migrations"
 #     import_config "#{Mix.env}.exs"
 config :people, People.Repo,
   adapter: Ecto.Adapters.Postgres,
-  database: "postgres",
+  database: "people",
   username: "postgres",
   password: "123456",
   hostname: "roammeet-postgres-service",
